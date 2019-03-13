@@ -11,18 +11,6 @@ import java.util.*
 
 internal class AuthMessagingService : FirebaseMessagingService() {
 
-    interface AuthMessagingNotificationImpl {
-        val uuid: String
-        val ip: String
-        val base: String
-    }
-
-    class AuthMessagingNotification(data: Map<String, String>) : AuthMessagingNotificationImpl {
-        override val uuid = data.getOrDefault("uuid", "")
-        override val ip = data.getOrDefault("ip", "")
-        override val base = data.getOrDefault("base", "")
-    }
-
     override fun onMessageReceived(remoteMessage: RemoteMessage?) {
         if (
             remoteMessage == null ||
@@ -48,6 +36,8 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             putExtra("ip", data.ip)
             putExtra("uuid", data.uuid)
             putExtra("base", data.base)
+
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
         val stackBuilder = TaskStackBuilder.create(this).apply {
@@ -55,7 +45,7 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             addNextIntent(intent)
         }
 
-        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT)
+        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     private fun genAction(
@@ -139,12 +129,15 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             }
 
         getSystemService(Context.NOTIFICATION_SERVICE)?.let {
-            (it as NotificationManager).notify(
+            val manager = it as NotificationManager
+
+            manager.notify(
                 getString(R.string.action_tag),
                 mNotificationId,
                 notification
             )
         }
+
     }
 
     companion object {
