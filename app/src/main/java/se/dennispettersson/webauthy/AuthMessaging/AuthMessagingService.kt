@@ -1,4 +1,4 @@
-package se.dennispettersson.webauthy
+package se.dennispettersson.webauthy.AuthMessaging
 
 import android.app.*
 import android.content.Context
@@ -7,6 +7,8 @@ import android.graphics.Color
 import android.graphics.drawable.Icon
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import se.dennispettersson.webauthy.MainActivity
+import se.dennispettersson.webauthy.R
 import java.util.*
 
 internal class AuthMessagingService : FirebaseMessagingService() {
@@ -20,7 +22,13 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             return
         }
 
-        showNotification(AuthMessagingNotification(remoteMessage.data))
+        val authMessagingNotification = AuthMessagingNotificationFactory.fromData(
+            remoteMessage.data
+        )
+
+        AuthMessagingNotificationContent.addItem(authMessagingNotification)
+
+        showNotification(authMessagingNotification)
     }
 
     private val mNotificationManager: NotificationManager by lazy {
@@ -32,7 +40,10 @@ internal class AuthMessagingService : FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java).apply {
             action = intentAction
 
-            putExtra("notification_id", mNotificationId)
+            putExtra(
+                "notification_id",
+                mNotificationId
+            )
             putExtra("ip", data.ip)
             putExtra("uuid", data.uuid)
             putExtra("base", data.base)

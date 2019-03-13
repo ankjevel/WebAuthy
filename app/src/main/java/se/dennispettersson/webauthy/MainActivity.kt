@@ -5,14 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
-import se.dennispettersson.webauthy.dummy.DummyContent
+import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationContent
+import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationFactory
+import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationRecyclerViewAdapter
+import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingService
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +28,11 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
 
-        mAuthMessagingNotificationRecyclerViewAdapter = AuthMessagingNotificationRecyclerViewAdapter(DummyContent.ITEMS, null)
+        mAuthMessagingNotificationRecyclerViewAdapter =
+            AuthMessagingNotificationRecyclerViewAdapter(
+                AuthMessagingNotificationContent.ITEMS,
+                null
+            )
 
         recyclerList.adapter = mAuthMessagingNotificationRecyclerViewAdapter
 
@@ -51,15 +56,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val message = AuthMessagingNotification(
-            hashMapOf(
-                "ip" to intent.getStringExtra("ip"),
-                "uuid" to intent.getStringExtra("uuid"),
-                "base" to intent.getStringExtra("base")
-            )
-        )
+        val message = AuthMessagingNotificationFactory.fromIntent(intent)
 
-        Log.d(TAG, "ip: ${message.ip}, uuid: ${message.uuid}, base: ${message.base}, action: ${intent.action}")
+        Log.d(TAG, "${message}, action: ${intent.action}")
 
         if (intent.action == null) {
             return

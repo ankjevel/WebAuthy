@@ -12,7 +12,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <service
-                android:name=".AuthMessagingService"
+                android:name=".AuthMessaging.AuthMessagingService"
                 android:enabled="true"
                 android:exported="true">
             <intent-filter>

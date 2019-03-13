@@ -1,4 +1,4 @@
-package se.dennispettersson.webauthy
+package se.dennispettersson.webauthy.AuthMessaging
 
 import android.content.Context
 import android.os.Bundle
@@ -9,13 +9,9 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-import se.dennispettersson.webauthy.dummy.DummyContent
-import se.dennispettersson.webauthy.dummy.DummyContent.DummyItem
+import se.dennispettersson.webauthy.R
 
 class AuthMessagingNotificationFragment : Fragment() {
-
-    // TODO: Customize parameters
     private var columnCount = 1
 
     private var listener: OnListFragmentInteractionListener? = null
@@ -32,7 +28,10 @@ class AuthMessagingNotificationFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = AuthMessagingNotificationRecyclerViewAdapter(DummyContent.ITEMS, listener)
+                adapter = AuthMessagingNotificationRecyclerViewAdapter(
+                    AuthMessagingNotificationContent.ITEMS,
+                    listener
+                )
             }
         }
         return view
@@ -65,7 +64,7 @@ class AuthMessagingNotificationFragment : Fragment() {
      */
     interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: DummyItem?)
+        fun onListFragmentInteraction(item: AuthMessagingNotification?)
     }
 
 }

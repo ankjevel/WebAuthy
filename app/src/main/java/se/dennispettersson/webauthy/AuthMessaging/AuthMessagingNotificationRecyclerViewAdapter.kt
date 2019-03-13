@@ -1,4 +1,4 @@
-package se.dennispettersson.webauthy
+package se.dennispettersson.webauthy.AuthMessaging
 
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -6,12 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-
-
-import se.dennispettersson.webauthy.AuthMessagingNotificationFragment.OnListFragmentInteractionListener
-import se.dennispettersson.webauthy.dummy.DummyContent.DummyItem
-
 import kotlinx.android.synthetic.main.fragment_authmessagingnotification.view.*
+import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationFragment.OnListFragmentInteractionListener
+import se.dennispettersson.webauthy.R
 
 /**
  * [RecyclerView.Adapter] that can display a [DummyItem] and makes a call to the
@@ -19,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_authmessagingnotification.view.*
  * TODO: Replace the implementation with code for your data type.
  */
 class AuthMessagingNotificationRecyclerViewAdapter(
-    private val mValues: List<DummyItem>,
+    private val mValues: List<AuthMessagingNotification>,
     private val mListener: OnListFragmentInteractionListener?
 ) : RecyclerView.Adapter<AuthMessagingNotificationRecyclerViewAdapter.ViewHolder>() {
 
@@ -27,8 +24,8 @@ class AuthMessagingNotificationRecyclerViewAdapter(
 
     init {
         mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as DummyItem
-            Log.d("NS", "click! ${item.id}")
+            val item = v.tag as AuthMessagingNotification
+            Log.d("NS", "click! ${item}")
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
             mListener?.onListFragmentInteraction(item)
@@ -43,8 +40,8 @@ class AuthMessagingNotificationRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
-        holder.mIdView.text = item.id
-        holder.mContentView.text = item.content
+        holder.mIdView.text = item.uuid
+        holder.mContentView.text = item.ip
 
         with(holder.mView) {
             tag = item
