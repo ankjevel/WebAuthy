@@ -13,10 +13,6 @@ import android.view.ViewGroup
 import se.dennispettersson.webauthy.R
 
 class AuthMessagingNotificationFragment : Fragment() {
-    private var columnCount = 1
-
-    private var listener: OnListFragmentInteractionListener? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -24,8 +20,10 @@ class AuthMessagingNotificationFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.activity_main, container, false)
 
+        Log.d(TAG, "onCreateView")
+
         if (view is RecyclerView) {
-            with(view) {
+            view.apply {
                 layoutManager = when {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
@@ -36,23 +34,36 @@ class AuthMessagingNotificationFragment : Fragment() {
                 )
             }
         }
+
         return view
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+
+        Log.d(TAG, "onAttach")
+
         if (context is OnListFragmentInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
+            throw RuntimeException("${context} must implement OnListFragmentInteractionListener")
         }
     }
 
     override fun onDetach() {
         super.onDetach()
+
+        Log.d(TAG, "onDetach")
+
         listener = null
     }
-    
+
+    companion object {
+        private val TAG = "AMNF"
+        private var columnCount = 1
+        private var listener: OnListFragmentInteractionListener? = null
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
+import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import se.dennispettersson.webauthy.MainActivity
@@ -22,11 +23,12 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             return
         }
 
-        val authMessagingNotification = AuthMessagingNotificationFactory.fromData(
+        val authMessagingNotification = AuthMessagingNotification.fromData(
             remoteMessage.data
         )
 
         AuthMessagingNotificationContent.addItem(authMessagingNotification)
+        Log.d(TAG, "saved ${authMessagingNotification}")
 
         showNotification(authMessagingNotification)
     }
@@ -39,15 +41,10 @@ internal class AuthMessagingService : FirebaseMessagingService() {
     private fun genIntent(intentAction: String?, data: AuthMessagingNotification): PendingIntent {
         val intent = Intent(this, MainActivity::class.java).apply {
             action = intentAction
-
-            putExtra(
-                "notification_id",
-                mNotificationId
-            )
-            putExtra("ip", data.ip)
-            putExtra("uuid", data.uuid)
-            putExtra("base", data.base)
-
+            putExtra("notification_id", mNotificationId)
+            for ((key, value) in data.toMap()) {
+                putExtra(key, value)
+            }
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
@@ -151,6 +148,7 @@ internal class AuthMessagingService : FirebaseMessagingService() {
     }
 
     companion object {
+        const val TAG = "AMS"
         const val CHANNEL_ID = "se.dennispettersson.webauthy.channel.notification"
         const val CHANNEL_NAME = "New notification"
         const val CHANNEL_GROUP = "new_notification"
