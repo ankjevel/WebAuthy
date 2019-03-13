@@ -148,7 +148,6 @@ internal class AuthMessagingService : FirebaseMessagingService() {
                 notification
             )
         }
-
     }
 
     companion object {
