@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_authmessagingnotification.view.*
 import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationFragment.OnListFragmentInteractionListener
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
 import se.dennispettersson.webauthy.R
 
 class AuthMessagingNotificationRecyclerViewAdapter(

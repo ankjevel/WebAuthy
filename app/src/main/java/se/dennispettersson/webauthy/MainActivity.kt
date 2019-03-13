@@ -4,18 +4,15 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
-import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotification
-import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationContent
 import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationRecyclerViewAdapter
 import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingService
-import java.io.File
-import java.io.FileNotFoundException
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificationContent
 
 class MainActivity : AppCompatActivity() {
     private val mNotificationTag: String by lazy {
@@ -24,9 +21,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "init")
-        readFromBundle(savedInstanceState)
-        Log.d(TAG, "initalized")
+        SaveState.readFromBundle(baseContext, savedInstanceState)
 
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.activity_main)
@@ -49,21 +44,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
-        Log.d(TAG, "save")
-        outState?.run {
-            putString("_AuthMessagingNotification", AuthMessagingNotificationContent.toSaveState())
-
-            val file = File(baseContext.filesDir, "state.p")
-            val parcel = Parcel.obtain()
-
-            writeToParcel(parcel, 0)
-            file.writeBytes(parcel.marshall())
-
-            parcel.recycle()
-        }
-        Log.d(TAG, "saved")
-
-        super.onSaveInstanceState(outState)
+        super.onSaveInstanceState(
+            SaveState.onSaveInstanceState(baseContext, outState)
+        )
     }
 
     private fun handleIntent(intent: Intent) {
@@ -92,43 +75,6 @@ class MainActivity : AppCompatActivity() {
 
                 manager.cancel(notification.tag, notification.id)
             }
-        }
-    }
-
-    private fun readFromBundle(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            savedInstanceState.getString("_AuthMessagingNotification").let {
-                AuthMessagingNotificationContent.fromSavedState(it as String)
-            }
-            return
-        }
-
-        try {
-            val file = File(baseContext.filesDir, "state.p")
-            val bytes = file.readBytes()
-
-            if (bytes.isEmpty()) {
-                return
-            }
-
-            val bundle = Bundle()
-            val parcel = Parcel.obtain()
-
-            parcel.unmarshall(bytes, 0, bytes.size)
-            parcel.setDataPosition(0)
-
-            bundle.readFromParcel(parcel)
-
-            parcel.recycle()
-
-            if (bundle.isEmpty) {
-                return
-            }
-
-            bundle.getString("_AuthMessagingNotification").let {
-                AuthMessagingNotificationContent.fromSavedState(it as String)
-            }
-        } catch (ex: FileNotFoundException) {
         }
     }
 

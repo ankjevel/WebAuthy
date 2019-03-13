@@ -10,6 +10,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificationContent
 import se.dennispettersson.webauthy.R
 
 class AuthMessagingNotificationFragment : Fragment() {

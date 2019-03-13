@@ -1,6 +1,5 @@
-package se.dennispettersson.webauthy.AuthMessaging
+package se.dennispettersson.webauthy.AuthMessaging.Content
 
-import android.support.v4.util.ArraySet
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
@@ -13,17 +12,17 @@ object AuthMessagingNotificationContent {
     private val TAG = "AMNC"
 
     fun addItem(item: AuthMessagingNotification) {
-        Log.d(TAG, "addItem")
+        Log.d(TAG, "addItem $item")
 
         if (ITEM_MAP.containsKey(item.uuid)) {
-            Log.d(TAG, "contained Key")
+            Log.d(TAG, "contains key $item")
             return
         }
 
         ITEMS.add(item)
         ITEM_MAP.put(item.uuid, item)
 
-        ITEMS.map { Log.d(TAG, "contained key ${it}")}
+        ITEMS.map { Log.d(TAG, "has item $it") }
     }
 
     fun toSaveState(): String {
@@ -56,7 +55,11 @@ object AuthMessagingNotificationContent {
 
         val array = JSONArray(state)
         for (i in 0..(array.length() - 1)) {
-            addItem(AuthMessagingNotification.fromJSONObject(array.get(i) as JSONObject))
+            addItem(
+                AuthMessagingNotification.fromJSONObject(
+                    array.get(i) as JSONObject
+                )
+            )
         }
     }
 }

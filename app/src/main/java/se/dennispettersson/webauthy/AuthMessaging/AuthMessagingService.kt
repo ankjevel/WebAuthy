@@ -5,11 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
+import android.os.Bundle
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
+import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificationContent
 import se.dennispettersson.webauthy.MainActivity
 import se.dennispettersson.webauthy.R
+import se.dennispettersson.webauthy.SaveState
 import java.util.*
 
 internal class AuthMessagingService : FirebaseMessagingService() {
@@ -28,6 +32,8 @@ internal class AuthMessagingService : FirebaseMessagingService() {
         )
 
         AuthMessagingNotificationContent.addItem(authMessagingNotification)
+        SaveState.onSaveInstanceState(baseContext, Bundle())
+
         Log.d(TAG, "saved ${authMessagingNotification}")
 
         showNotification(authMessagingNotification)
