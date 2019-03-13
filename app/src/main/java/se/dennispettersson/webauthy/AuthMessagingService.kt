@@ -5,12 +5,23 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
-import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import java.util.*
 
 internal class AuthMessagingService : FirebaseMessagingService() {
+
+    interface AuthMessagingNotificationImpl {
+        val uuid: String
+        val ip: String
+        val base: String
+    }
+
+    class AuthMessagingNotification(data: Map<String, String>) : AuthMessagingNotificationImpl {
+        override val uuid = data.getOrDefault("uuid", "")
+        override val ip = data.getOrDefault("ip", "")
+        override val base = data.getOrDefault("base", "")
+    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage?) {
         if (
@@ -21,36 +32,28 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             return
         }
 
-        val data = remoteMessage.data
-
-        Log.d(TAG, "Message data payload: \"${data}\"")
-
-        showNotification(
-            hashMapOf(
-                "uuid" to data.getOrDefault("uuid", ""),
-                "ip" to data.getOrDefault("ip", "0.0.0.0"),
-                "base" to data.getOrDefault("base", "http://base")
-            )
-        )
-}
+        showNotification(AuthMessagingNotification(remoteMessage.data))
+    }
 
     private val mNotificationManager: NotificationManager by lazy {
         val context = this.applicationContext
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    private fun genIntent(intentAction: String?, data: Map<String, String>): PendingIntent {
-        val stackBuilder = TaskStackBuilder.create(this)
-
-        stackBuilder.addParentStack(MainActivity::class.java)
-        stackBuilder.addNextIntent(Intent(this, MainActivity::class.java).apply {
+    private fun genIntent(intentAction: String?, data: AuthMessagingNotification): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java).apply {
             action = intentAction
 
             putExtra("notification_id", mNotificationId)
-            putExtra("ip", data.getOrDefault("ip", ""))
-            putExtra("uuid", data.getOrDefault("uuid", ""))
-            putExtra("base", data.getOrDefault("base", ""))
-        })
+            putExtra("ip", data.ip)
+            putExtra("uuid", data.uuid)
+            putExtra("base", data.base)
+        }
+
+        val stackBuilder = TaskStackBuilder.create(this).apply {
+            addParentStack(MainActivity::class.java)
+            addNextIntent(intent)
+        }
 
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT)
     }
@@ -58,11 +61,14 @@ internal class AuthMessagingService : FirebaseMessagingService() {
     private fun genAction(
         label: Int,
         action: Int,
-        data: Map<String, String>
+        data: AuthMessagingNotification
     ): Notification.Action {
         return Notification.Action
             .Builder(
-                Icon.createWithResource(this, android.R.drawable.ic_dialog_info),
+                Icon.createWithResource(
+                    this,
+                    android.R.drawable.ic_dialog_info
+                ),
                 getString(label),
                 genIntent(
                     intentAction = getString(action),
@@ -73,29 +79,33 @@ internal class AuthMessagingService : FirebaseMessagingService() {
     }
 
     private fun createChannel() {
-        NotificationChannel(
-            CHANNEL_ID,
-            CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_HIGH
-        ).let { channel ->
-            channel.enableVibration(true)
-            channel.setShowBadge(true)
-            channel.enableLights(true)
-            channel.lightColor = Color.GREEN
-            channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-
-            mNotificationManager.createNotificationChannel(channel)
-        }
+        mNotificationManager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableVibration(true)
+                setShowBadge(true)
+                enableLights(true)
+                lightColor = Color.GREEN
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
+        )
     }
 
     private fun showNotification(
-        data: Map<String, String>
+        data: AuthMessagingNotification
     ) {
         createChannel()
 
-        val body = getString(R.string.msg_body, data.get("ip"))
+        val body = getString(R.string.msg_body, data.ip)
 
-        val notification = Notification.Builder(applicationContext, CHANNEL_ID)
+        val notification = Notification
+            .Builder(
+                applicationContext,
+                CHANNEL_ID
+            )
             .setContentIntent(
                 genIntent(
                     intentAction = null,
@@ -124,8 +134,9 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             )
             .setGroup(CHANNEL_GROUP)
             .build()
-
-        notification.flags = Notification.FLAG_AUTO_CANCEL
+            .apply {
+                flags = Notification.FLAG_AUTO_CANCEL
+            }
 
         getSystemService(Context.NOTIFICATION_SERVICE)?.let {
             (it as NotificationManager).notify(
@@ -136,12 +147,16 @@ internal class AuthMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private companion object {
-        const val TAG = "AMS"
+    companion object {
         const val CHANNEL_ID = "se.dennispettersson.webauthy.channel.notification"
         const val CHANNEL_NAME = "New notification"
         const val CHANNEL_GROUP = "new_notification"
 
         val mNotificationId = Random().nextInt(1024) + (1024 * 2)
+        val acceptedTags = arrayListOf<Int?>(
+            R.string.action_allow,
+            R.string.action_deny,
+            null
+        )
     }
 }

@@ -1,6 +1,7 @@
 package se.dennispettersson.webauthy
 
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -16,8 +17,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
-import android.content.Context
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -83,22 +82,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleIntent (intent: Intent) {
-        val accepted = arrayListOf<String?>(
-            getString(R.string.action_allow),
-            getString(R.string.action_deny),
-            null
-        )
+    private fun handleIntent(intent: Intent) {
+        val accepted = AuthMessagingService.acceptedTags.map {
+            if (it != null) getString(it) else null
+        }
 
         if (intent.action !in accepted) {
             return
         }
 
-        val ip = intent.getStringExtra("ip")
-        val uuid = intent.getStringExtra("uuid")
-        val base = intent.getStringExtra("base")
+        val message = AuthMessagingService.AuthMessagingNotification(
+            hashMapOf(
+                "ip" to intent.getStringExtra("ip"),
+                "uuid" to intent.getStringExtra("uuid"),
+                "base" to intent.getStringExtra("base")
+            )
+        )
 
-        Log.d(TAG, "ip: ${ip}, uuid: ${uuid}, base: ${base}, action: ${intent.action}")
+        Log.d(TAG, "ip: ${message.ip}, uuid: ${message.uuid}, base: ${message.base}, action: ${intent.action}")
 
         if (intent.action == null) {
             return
