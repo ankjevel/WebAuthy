@@ -13,10 +13,28 @@ import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationRecyc
 import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingService
 import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
 import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificationContent
+import android.support.v7.widget.helper.ItemTouchHelper
+import se.dennispettersson.webauthy.AuthMessaging.OnListFragmentInteractionListener
 
 class MainActivity : AppCompatActivity() {
     private val mNotificationTag: String by lazy {
         getString(R.string.action_tag)
+    }
+
+    inner class onListFragmentInteractionListener: OnListFragmentInteractionListener {
+        override fun onListFragmentInteraction(item: AuthMessagingNotification?) {
+            Log.d(TAG, "click! ${item}")
+        }
+    }
+
+    inner class swipeActions: SwipeControllerActions {
+        override fun onLeftDragged(position: Int) {
+            Log.d(TAG, "onLeftDragged $position")
+        }
+
+        override fun onRightDragged(position: Int) {
+            Log.d(TAG, "onRightDragged $position")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,15 +44,17 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(toolbar)
+        recyclerList.adapter = AuthMessagingNotificationRecyclerViewAdapter(
+            AuthMessagingNotificationContent.ITEMS.reversed(),
+            onListFragmentInteractionListener()
+        )
 
-        mAuthMessagingNotificationRecyclerViewAdapter =
-            AuthMessagingNotificationRecyclerViewAdapter(
-                AuthMessagingNotificationContent.ITEMS,
-                null
-            )
+        val swipeController = SwipeController().apply {
+            addActions(swipeActions())
+        }
 
-        recyclerList.adapter = mAuthMessagingNotificationRecyclerViewAdapter
+        val itemTouchhelper = ItemTouchHelper(swipeController)
+        itemTouchhelper.attachToRecyclerView(recyclerList)
 
         FirebaseMessaging
             .getInstance()

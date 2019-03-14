@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_authmessagingnotification.view.*
-import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationFragment.OnListFragmentInteractionListener
 import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
 import se.dennispettersson.webauthy.R
 
@@ -31,6 +30,7 @@ class AuthMessagingNotificationRecyclerViewAdapter(
         val view = LayoutInflater
             .from(parent.context)
             .inflate(R.layout.fragment_authmessagingnotification, parent, false)
+
         return ViewHolder(view)
     }
 
@@ -58,4 +58,21 @@ class AuthMessagingNotificationRecyclerViewAdapter(
 
         override fun toString(): String = "${super.toString()} '${mContentView.text}'"
     }
+}
+
+
+/**
+ * This interface must be implemented by activities that contain this
+ * fragment to allow an interaction in this fragment to be communicated
+ * to the activity and potentially other fragments contained in that
+ * activity.
+ *
+ *
+ * See the Android Training lesson
+ * [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html)
+ * for more information.
+ */
+interface OnListFragmentInteractionListener {
+    // TODO: Update argument type and name
+    fun onListFragmentInteraction(item: AuthMessagingNotification?)
 }
