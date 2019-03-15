@@ -1,15 +1,17 @@
 package se.dennispettersson.webauthy
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.*
-import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_CANCEL
 import android.view.MotionEvent.ACTION_UP
-import android.view.View
 
-
+@Suppress("NON_EXHAUSTIVE_WHEN")
 class SwipeController : Callback() {
     fun addActions(actions: SwipeControllerActions) {
         swipesActions = actions
@@ -53,42 +55,58 @@ class SwipeController : Callback() {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setTouchListener(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
         dX: Float
     ) {
-        recyclerView.setOnTouchListener(object : View.OnTouchListener {
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                swipeBack = event.action == ACTION_CANCEL || event.action == ACTION_UP
+        recyclerView.setOnTouchListener { _, event ->
+            swipeBack = event.action == ACTION_CANCEL || event.action == ACTION_UP
 
-                if (swipeBack) {
-                    if (dX < -buttonWidth) buttonShowedState = ButtonsState.RIGHT_VISIBLE
-                    else if (dX > buttonWidth) buttonShowedState = ButtonsState.LEFT_VISIBLE
-                }
+            val itemView = viewHolder.itemView
 
-                if (buttonShowedState == ButtonsState.LEFT_VISIBLE) {
-                    swipesActions?.onLeftDragged(viewHolder.getAdapterPosition());
+            when (event.action) {
+                ACTION_STATE_DRAG ->
+                    buttonShowedState = when {
+                        dX < -eventStateWidth -> {
+                            itemView.setBackgroundColor(Color.TRANSPARENT)
+//                                ContextCompat.getColor(MainActivity.instance, R.color.colorDeny)
+//                            )
+                            ActionState.SWIPE_LEFT
+                        }
+                        dX > eventStateWidth -> {
+                            itemView.setBackgroundColor(Color.TRANSPARENT)
+                            ActionState.SWIPE_RIGHT
+                        }
+                        else -> {
+                            itemView.setBackgroundColor(Color.WHITE)
+                            ActionState.NONE
+                        }
+                    }
+                ACTION_UP -> {
+                    itemView.setBackgroundColor(Color.TRANSPARENT)
+                    when (buttonShowedState) {
+                        ActionState.SWIPE_RIGHT -> swipesActions?.onSwipeRight(viewHolder.getAdapterPosition())
+                        ActionState.SWIPE_LEFT -> swipesActions?.onSwipeLeft(viewHolder.getAdapterPosition())
+                    }
                 }
-                else if (buttonShowedState == ButtonsState.RIGHT_VISIBLE) {
-                    swipesActions?.onRightDragged(viewHolder.getAdapterPosition());
-                }
-
-                return false
             }
-        })
+
+            false
+        }
     }
 
-    internal enum class ButtonsState {
-        GONE,
-        LEFT_VISIBLE,
-        RIGHT_VISIBLE
+    internal enum class ActionState {
+        NONE,
+        SWIPE_LEFT,
+        SWIPE_RIGHT
     }
 
     companion object {
-        private var buttonWidth: Float = 500.0f
-        private var swipeBack: Boolean = false
-        private var buttonShowedState: ButtonsState = ButtonsState.GONE
+        private var eventStateWidth = 250.0f
+        private var swipeBack = false
+        private var buttonShowedState = ActionState.NONE
         private var swipesActions: SwipeControllerActions? = null
     }
 }

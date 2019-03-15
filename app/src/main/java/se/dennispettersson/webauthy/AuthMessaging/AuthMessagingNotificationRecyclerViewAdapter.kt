@@ -1,7 +1,6 @@
 package se.dennispettersson.webauthy.AuthMessaging
 
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,10 +16,8 @@ class AuthMessagingNotificationRecyclerViewAdapter(
     private val mOnClickListener: View.OnClickListener
 
     init {
-        mOnClickListener = View.OnClickListener { v ->
-            val item = v.tag as AuthMessagingNotification
-
-            Log.d(TAG, "click! ${item}")
+        mOnClickListener = View.OnClickListener { view ->
+            val item = view.tag as AuthMessagingNotification
 
             mListener?.onListFragmentInteraction(item)
         }
@@ -36,6 +33,7 @@ class AuthMessagingNotificationRecyclerViewAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mValues[position]
+
         holder.apply {
             mIdView.text = item.uuid
             mContentView.text = item.ip
@@ -48,10 +46,6 @@ class AuthMessagingNotificationRecyclerViewAdapter(
 
     override fun getItemCount(): Int = mValues.size
 
-    companion object {
-        private val TAG = "AMNRVA"
-    }
-
     inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
         val mIdView: TextView = mView.item_number
         val mContentView: TextView = mView.content
@@ -59,20 +53,8 @@ class AuthMessagingNotificationRecyclerViewAdapter(
         override fun toString(): String = "${super.toString()} '${mContentView.text}'"
     }
 }
-
-
-/**
- * This interface must be implemented by activities that contain this
- * fragment to allow an interaction in this fragment to be communicated
- * to the activity and potentially other fragments contained in that
- * activity.
- *
- *
- * See the Android Training lesson
- * [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html)
- * for more information.
- */
+/*
 interface OnListFragmentInteractionListener {
-    // TODO: Update argument type and name
     fun onListFragmentInteraction(item: AuthMessagingNotification?)
 }
+*/

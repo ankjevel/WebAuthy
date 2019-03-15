@@ -21,7 +21,7 @@
                 app:title="@string/app_name"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"  />
+                android:background="?attr/colorPrimary"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -34,8 +34,9 @@
             android:id="@+id/recyclerList"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             android:name="se.dennispettersson.webauthy.AuthMessagingNotificationFragment"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            app:layoutManager="LinearLayoutManager"/>
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            app:layoutManager="LinearLayoutManager"
+    />
 
 </android.support.design.widget.CoordinatorLayout>

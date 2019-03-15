@@ -24,6 +24,7 @@ internal class AuthMessagingService : FirebaseMessagingService() {
             remoteMessage.data == null ||
             remoteMessage.data?.isEmpty() == true
         ) {
+            Log.d(TAG, "empty message? $remoteMessage")
             return
         }
 

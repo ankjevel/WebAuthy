@@ -1,7 +1,7 @@
 package se.dennispettersson.webauthy
 
 interface SwipeControllerActions {
-    fun onLeftDragged(position: Int) {}
+    fun onSwipeLeft(position: Int) {}
 
-    fun onRightDragged(position: Int) {}
+    fun onSwipeRight(position: Int) {}
 }
