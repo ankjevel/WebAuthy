@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        instance = this
+
         SaveState.readFromBundle(baseContext, savedInstanceState)
 
         FirebaseApp.initializeApp(this)
@@ -36,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             object : OnListFragmentInteractionListener {
                 override fun onListFragmentInteraction(item: AuthMessagingNotification?) {
                     Log.d(TAG, "click! ${AuthMessagingNotificationContent.ITEMS.indexOf(item)} ${item}")
-                    AuthMessagingNotificationContent.removeItem(item)
+//                    AuthMessagingNotificationContent.removeItem(item)
                 }
             }
         )
@@ -118,5 +120,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TOPIC_NAME = "auth"
         const val TAG = "MA"
+
+        var instance: Context? = null
     }
 }

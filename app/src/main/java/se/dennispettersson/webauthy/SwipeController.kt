@@ -1,13 +1,18 @@
 package se.dennispettersson.webauthy
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.*
 import android.view.MotionEvent.ACTION_CANCEL
 import android.view.MotionEvent.ACTION_UP
+import android.graphics.RectF
+import android.support.v4.content.ContextCompat
+
 
 @Suppress("NON_EXHAUSTIVE_WHEN")
 class SwipeController : Callback() {
@@ -51,6 +56,27 @@ class SwipeController : Callback() {
         }
 
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+
+        drawButtons(c, viewHolder)
+    }
+
+    private fun drawButtons(c: Canvas, viewHolder: RecyclerView.ViewHolder) {
+        val v = object {
+            val left = viewHolder.itemView.left.toFloat()
+            val top = viewHolder.itemView.top.toFloat()
+            val right = viewHolder.itemView.right.toFloat()
+            val bottom = viewHolder.itemView.bottom.toFloat()
+        }
+
+        val width = (v.right - v.left) / 2
+
+        c.drawRect(RectF(v.left, v.top, v.left + width, v.bottom), Paint().apply {
+            color = ContextCompat.getColor(MainActivity.instance as Context, R.color.colorAllow)
+        })
+
+        c.drawRect(RectF(v.right - width, v.top, v.right, v.bottom), Paint().apply {
+            color = ContextCompat.getColor(MainActivity.instance as Context, R.color.colorDeny)
+        })
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -67,22 +93,11 @@ class SwipeController : Callback() {
             when (event.action) {
                 ACTION_STATE_DRAG ->
                     buttonShowedState = when {
-                        dX < -eventStateWidth -> {
-                            itemView.setBackgroundColor(Color.TRANSPARENT)
-                            // ContextCompat.getColor(MainActivity.instance, R.color.colorDeny)
-                            ActionState.SWIPE_LEFT
-                        }
-                        dX > eventStateWidth -> {
-                            itemView.setBackgroundColor(Color.TRANSPARENT)
-                            ActionState.SWIPE_RIGHT
-                        }
-                        else -> {
-                            itemView.setBackgroundColor(Color.WHITE)
-                            ActionState.NONE
-                        }
+                        dX < -eventStateWidth -> ActionState.SWIPE_LEFT
+                        dX > eventStateWidth -> ActionState.SWIPE_RIGHT
+                        else -> ActionState.NONE
                     }
                 ACTION_UP -> {
-                    itemView.setBackgroundColor(Color.TRANSPARENT)
                     when (buttonShowedState) {
                         ActionState.SWIPE_RIGHT -> swipesActions?.onSwipeRight(viewHolder.getAdapterPosition())
                         ActionState.SWIPE_LEFT -> swipesActions?.onSwipeLeft(viewHolder.getAdapterPosition())
