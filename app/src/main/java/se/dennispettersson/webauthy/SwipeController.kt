@@ -3,15 +3,14 @@ package se.dennispettersson.webauthy
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.*
 import android.view.MotionEvent.ACTION_CANCEL
 import android.view.MotionEvent.ACTION_UP
-import android.graphics.RectF
-import android.support.v4.content.ContextCompat
 
 
 @Suppress("NON_EXHAUSTIVE_WHEN")
@@ -87,8 +86,6 @@ class SwipeController : Callback() {
     ) {
         recyclerView.setOnTouchListener { _, event ->
             swipeBack = event.action == ACTION_CANCEL || event.action == ACTION_UP
-
-            val itemView = viewHolder.itemView
 
             when (event.action) {
                 ACTION_STATE_DRAG ->
