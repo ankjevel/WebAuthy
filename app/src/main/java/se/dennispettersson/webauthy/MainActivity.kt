@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         recyclerList.adapter = AuthMessagingNotificationRecyclerViewAdapter(
-            AuthMessagingNotificationContent.ITEMS.reversed(),
+            AuthMessagingNotificationContent.ITEMS,
             object : OnListFragmentInteractionListener {
                 override fun onListFragmentInteraction(item: AuthMessagingNotification?) {
                     Log.d(TAG, "click! ${AuthMessagingNotificationContent.ITEMS.indexOf(item)} ${item}")
@@ -66,18 +66,9 @@ class MainActivity : AppCompatActivity() {
         AuthMessagingNotificationContent.addListener(
             object : OnAuthMessagingNotificationContentListener {
                 override fun onUpdate(item: AuthMessagingNotification?, index: Int?) {
-                    if (index != null) {
-                        val size = AuthMessagingNotificationContent.ITEMS.size
-                        val position = (size + 1) - index
-
-                        recyclerList.removeViewAt(position)
-                        recyclerList.adapter?.notifyItemRemoved(position);
-                        recyclerList.adapter?.notifyItemRangeChanged(position, size);
-                    }
-
                     recyclerList.adapter?.notifyDataSetChanged()
 
-                    Log.d(TAG, "AuthMessagingNotificationContent::on update $item, $index")
+                    Log.d(TAG, "AuthMessagingNotificationContent::on update ${AuthMessagingNotificationContent.ITEMS}")
                 }
             }
         )

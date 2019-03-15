@@ -10,7 +10,7 @@ import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificat
 import se.dennispettersson.webauthy.R
 
 class AuthMessagingNotificationRecyclerViewAdapter(
-    private val mValues: List<AuthMessagingNotification>,
+    private val mValues: MutableSet<AuthMessagingNotification>,
     private val mListener: OnListFragmentInteractionListener?
 ) : RecyclerView.Adapter<AuthMessagingNotificationRecyclerViewAdapter.ViewHolder>() {
     private val mOnClickListener: View.OnClickListener
@@ -32,7 +32,7 @@ class AuthMessagingNotificationRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = mValues[position]
+        val item = mValues.reversed().get(position)
 
         holder.apply {
             mIdView.text = item.uuid
@@ -53,8 +53,3 @@ class AuthMessagingNotificationRecyclerViewAdapter(
         override fun toString(): String = "${super.toString()} '${mContentView.text}'"
     }
 }
-/*
-interface OnListFragmentInteractionListener {
-    fun onListFragmentInteraction(item: AuthMessagingNotification?)
-}
-*/

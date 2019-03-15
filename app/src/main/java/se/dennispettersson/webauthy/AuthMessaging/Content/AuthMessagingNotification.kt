@@ -19,7 +19,7 @@ data class AuthMessagingNotification(
     companion object {
         val KEYS = hashSetOf("uuid", "ip", "base")
 
-        private val TAG = "AMN"
+        // private val TAG = "AMN"
 
         operator fun invoke(map: Map<String, String>): AuthMessagingNotification =
             AuthMessagingNotification(
