@@ -25,8 +25,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        instance = this
-
         SaveState.readFromBundle(baseContext, savedInstanceState)
 
         FirebaseApp.initializeApp(this)
@@ -66,9 +64,11 @@ class MainActivity : AppCompatActivity() {
         AuthMessagingNotificationContent.addListener(
             object : OnAuthMessagingNotificationContentListener {
                 override fun onUpdate(item: AuthMessagingNotification?, index: Int?) {
-                    recyclerList.adapter?.notifyDataSetChanged()
-
-                    Log.d(TAG, "AuthMessagingNotificationContent::on update ${AuthMessagingNotificationContent.ITEMS}")
+                    Thread(Runnable {
+                        this@MainActivity.runOnUiThread {
+                            recyclerList.adapter?.notifyDataSetChanged()
+                        }
+                    }).start()
                 }
             }
         )
@@ -118,6 +118,5 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TOPIC_NAME = "auth"
         const val TAG = "MA"
-        lateinit var instance: MainActivity private set
     }
 }

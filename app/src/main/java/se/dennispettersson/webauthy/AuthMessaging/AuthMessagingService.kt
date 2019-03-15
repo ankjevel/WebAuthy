@@ -161,7 +161,7 @@ internal class AuthMessagingService : FirebaseMessagingService() {
         const val CHANNEL_GROUP = "new_notification"
 
         val mNotificationId = Random().nextInt(1024) + (1024 * 2)
-        val acceptedTags = arrayListOf<Int?>(
+        val acceptedTags = arrayListOf(
             R.string.action_allow,
             R.string.action_deny,
             null
