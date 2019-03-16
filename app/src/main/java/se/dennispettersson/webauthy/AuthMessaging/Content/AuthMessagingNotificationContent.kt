@@ -1,17 +1,19 @@
 package se.dennispettersson.webauthy.AuthMessaging.Content
 
+import android.content.Context
 import android.util.ArraySet
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.*
+import se.dennispettersson.webauthy.MainActivity
+import se.dennispettersson.webauthy.SaveState
 
 object AuthMessagingNotificationContent {
     private val TAG = "AMNC"
     private val listeners: MutableSet<OnAuthMessagingNotificationContentListener> = ArraySet()
 
     val ITEMS: MutableSet<AuthMessagingNotification> = ArraySet()
-    val ITEM_MAP: MutableMap<String, AuthMessagingNotification> = HashMap()
+    private val keys: MutableSet<String> = ArraySet()
 
     private fun notifyListenersUpdate(
         item: AuthMessagingNotification? = null,
@@ -23,16 +25,18 @@ object AuthMessagingNotificationContent {
     }
 
     fun addItem(item: AuthMessagingNotification, ignoreUpdate: Boolean? = false) {
-        if (ITEM_MAP.containsKey(item.uuid)) {
+        if (keys.contains(item.uuid)) {
             return
         }
 
         ITEMS.add(item)
-        ITEM_MAP.put(item.uuid, item)
+        keys.add(item.uuid)
 
         if (ignoreUpdate == true) {
             return
         }
+
+        SaveState.saveInstanceState()
 
         notifyListenersUpdate(item)
     }
@@ -44,14 +48,14 @@ object AuthMessagingNotificationContent {
             return
         }
 
-        val index = ITEMS.indexOf(item)
-
-        ITEM_MAP.remove(item.uuid)
         ITEMS.remove(item)
+        keys.remove(item.uuid)
 
         Log.d(TAG, "removed")
 
-        notifyListenersUpdate(item, index)
+        SaveState.saveInstanceState()
+
+        notifyListenersUpdate(item, ITEMS.indexOf(item))
     }
 
     fun addListener(listener: OnAuthMessagingNotificationContentListener) {
@@ -80,14 +84,15 @@ object AuthMessagingNotificationContent {
 
     fun fromSavedState(state: String) {
         ITEMS.clear()
-        ITEM_MAP.clear()
+        keys.clear()
 
         val array = JSONArray(state)
         for (i in 0..(array.length() - 1)) {
             addItem(
                 AuthMessagingNotification.fromJSONObject(
                     array.get(i) as JSONObject
-                )
+                ),
+                ignoreUpdate = true
             )
         }
 

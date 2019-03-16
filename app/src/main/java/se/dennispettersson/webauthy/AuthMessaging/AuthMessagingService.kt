@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
-import android.os.Bundle
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -13,10 +12,12 @@ import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificat
 import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotificationContent
 import se.dennispettersson.webauthy.MainActivity
 import se.dennispettersson.webauthy.R
-import se.dennispettersson.webauthy.SaveState
 import java.util.*
 
 internal class AuthMessagingService : FirebaseMessagingService() {
+    init {
+        createChannel()
+    }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage?) {
         if (
@@ -33,26 +34,18 @@ internal class AuthMessagingService : FirebaseMessagingService() {
         )
 
         AuthMessagingNotificationContent.addItem(authMessagingNotification)
-        SaveState.onSaveInstanceState(baseContext, Bundle())
-
-        Log.d(TAG, "saved ${authMessagingNotification}")
 
         showNotification(authMessagingNotification)
     }
 
-    private val mNotificationManager: NotificationManager by lazy {
-        val context = this.applicationContext
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    }
-
     private fun genIntent(intentAction: String?, data: AuthMessagingNotification): PendingIntent {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val intent = Intent(MainActivity.instance, MainActivity::class.java).apply {
             action = intentAction
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra("notification_id", mNotificationId)
             for ((key, value) in data.toMap()) {
                 putExtra(key, value)
             }
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
         val stackBuilder = TaskStackBuilder.create(this).apply {
@@ -84,7 +77,12 @@ internal class AuthMessagingService : FirebaseMessagingService() {
     }
 
     private fun createChannel() {
-        mNotificationManager.createNotificationChannel(
+        val manager by lazy {
+            val context = MainActivity.instance as Context
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        }
+
+        manager.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
@@ -102,8 +100,6 @@ internal class AuthMessagingService : FirebaseMessagingService() {
     private fun showNotification(
         data: AuthMessagingNotification
     ) {
-        createChannel()
-
         val body = getString(R.string.msg_body, data.ip)
 
         val notification = Notification
@@ -111,33 +107,33 @@ internal class AuthMessagingService : FirebaseMessagingService() {
                 applicationContext,
                 CHANNEL_ID
             )
-            .setContentIntent(
-                genIntent(
-                    intentAction = null,
-                    data = data
+            .apply {
+                setContentIntent(
+                    genIntent(
+                        intentAction = null,
+                        data = data
+                    )
                 )
-            )
-            .setAutoCancel(true)
-            .setContentTitle(getString(R.string.msg_title))
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setStyle(
-                Notification.BigTextStyle().bigText(body)
-            )
-            .setChannelId(CHANNEL_ID)
-            .setContentText(body)
-            .setActions(
-                genAction(
-                    label = R.string.msg_allow,
-                    action = R.string.action_allow,
-                    data = data
-                ),
-                genAction(
-                    label = R.string.msg_deny,
-                    action = R.string.action_deny,
-                    data = data
+                setAutoCancel(true)
+                setContentTitle(getString(R.string.msg_title))
+                setSmallIcon(android.R.drawable.ic_dialog_info)
+                setChannelId(CHANNEL_ID)
+                setContentText(body)
+                setActions(
+                    genAction(
+                        label = R.string.msg_allow,
+                        action = R.string.action_allow,
+                        data = data
+                    ),
+                    genAction(
+                        label = R.string.msg_deny,
+                        action = R.string.action_deny,
+                        data = data
+                    )
                 )
-            )
-            .setGroup(CHANNEL_GROUP)
+                setGroup(CHANNEL_GROUP)
+                style = Notification.BigTextStyle().bigText(body)
+            }
             .build()
             .apply {
                 flags = Notification.FLAG_AUTO_CANCEL

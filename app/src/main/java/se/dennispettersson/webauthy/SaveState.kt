@@ -8,9 +8,12 @@ import java.io.File
 import java.io.FileNotFoundException
 
 object SaveState {
-    fun onSaveInstanceState(
-        context: Context,
-        outState: Bundle?
+    private val context by lazy {
+        MainActivity.instance as Context
+    }
+
+    fun saveInstanceState(
+        outState: Bundle? = Bundle()
     ): Bundle? {
         outState?.run {
             putString("_AuthMessagingNotification", AuthMessagingNotificationContent.toSaveState())

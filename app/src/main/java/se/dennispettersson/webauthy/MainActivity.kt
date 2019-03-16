@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onListFragmentInteraction(item: AuthMessagingNotification?) {
                     Log.d(TAG, "click! ${AuthMessagingNotificationContent.ITEMS.indexOf(item)} ${item}")
 //                    AuthMessagingNotificationContent.removeItem(item)
+//                    AuthMessagingNotificationContent.ITEMS.clear()
                 }
             }
         )
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(
-            SaveState.onSaveInstanceState(baseContext, outState)
+            SaveState.saveInstanceState(outState)
         )
     }
 
