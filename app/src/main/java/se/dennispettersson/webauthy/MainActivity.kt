@@ -22,15 +22,17 @@ class MainActivity : AppCompatActivity() {
         getString(R.string.action_tag)
     }
 
+    val TOPIC_NAME: String by lazy {
+        getString(R.string.firebase_topic) as String
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         instance = this
 
         SaveState.readFromBundle(baseContext, savedInstanceState)
-
         FirebaseApp.initializeApp(this)
-
         setContentView(R.layout.activity_main)
 
         recyclerList.adapter = AuthMessagingNotificationRecyclerViewAdapter(
@@ -47,13 +49,13 @@ class MainActivity : AppCompatActivity() {
         ItemTouchHelper(SwipeController().apply {
             addActions(object : SwipeControllerActions {
                 override fun onSwipeLeft(position: Int) {
-                    Log.d(TAG, "onSwipeLeft, DENY ${getItem(position)}")
-                    AuthMessagingNotificationContent.removeItem(getItem(position))
+                    rest.handleAction(getItem(position), action = "deny")
+//                    AuthMessagingNotificationContent.removeItem(item)
                 }
 
                 override fun onSwipeRight(position: Int) {
-                    Log.d(TAG, "onSwipeRight, ALLOW ${getItem(position)}")
-                    AuthMessagingNotificationContent.removeItem(getItem(position))
+                    rest.handleAction(getItem(position), action = "allow")
+//                    AuthMessagingNotificationContent.removeItem(item)
                 }
 
                 private fun getItem(position: Int): AuthMessagingNotification? {
@@ -89,6 +91,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+
     private fun handleIntent(intent: Intent) {
         val accepted = AuthMessagingService.acceptedTags.map {
             if (it != null) getString(it) else null
@@ -106,6 +109,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        rest.handleAction(message, action = intent.action as String)
+
         getSystemService(Context.NOTIFICATION_SERVICE)?.let {
             val manager = it as NotificationManager
             for (notification in manager.activeNotifications) {
@@ -119,9 +124,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val TOPIC_NAME = "auth"
         const val TAG = "MA"
 
         var instance: Context? = null
+        val rest = RestService()
     }
 }

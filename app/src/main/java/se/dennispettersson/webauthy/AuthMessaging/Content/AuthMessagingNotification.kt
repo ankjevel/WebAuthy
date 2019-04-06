@@ -4,28 +4,51 @@ import android.content.Intent
 import org.json.JSONObject
 
 data class AuthMessagingNotification(
-    val uuid: String,
     val ip: String,
-    val base: String
+    val org: String,
+    val city: String,
+    val region: String,
+    val base: String,
+    val allow: String,
+    val deny: String,
+    val status: String,
+    val uuid: String
 ) {
     override fun toString(): String = "${toMap()}"
 
+    fun getURL(input: String): String {
+        return "$base/${if (input == "allow") allow else deny}"
+    }
+
     fun toMap(): Map<String, String> = hashMapOf(
-        "uuid" to uuid,
         "ip" to ip,
-        "base" to base
+        "org" to org,
+        "city" to city,
+        "region" to region,
+        "base" to base,
+        "allow" to allow,
+        "deny" to deny,
+        "status" to status,
+        "uuid" to uuid
     )
 
     companion object {
-        val KEYS = hashSetOf("uuid", "ip", "base")
+        val KEYS = hashSetOf(
+            "ip", "org", "city", "region", "base", "allow", "deny", "status", "uuid"
+        )
 
         // private val TAG = "AMN"
-
         operator fun invoke(map: Map<String, String>): AuthMessagingNotification =
             AuthMessagingNotification(
-                map["uuid"] as String,
                 map["ip"] as String,
-                map["base"] as String
+                map["org"] as String,
+                map["city"] as String,
+                map["region"] as String,
+                map["base"] as String,
+                map["allow"] as String,
+                map["deny"] as String,
+                map["status"] as String,
+                map["uuid"] as String
             )
 
         fun fromIntent(intent: Intent): AuthMessagingNotification {

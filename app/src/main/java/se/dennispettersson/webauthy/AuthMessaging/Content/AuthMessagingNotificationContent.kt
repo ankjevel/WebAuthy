@@ -1,11 +1,9 @@
 package se.dennispettersson.webauthy.AuthMessaging.Content
 
-import android.content.Context
 import android.util.ArraySet
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
-import se.dennispettersson.webauthy.MainActivity
 import se.dennispettersson.webauthy.SaveState
 
 object AuthMessagingNotificationContent {

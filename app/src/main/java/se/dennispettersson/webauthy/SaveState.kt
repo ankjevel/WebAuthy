@@ -8,6 +8,8 @@ import java.io.File
 import java.io.FileNotFoundException
 
 object SaveState {
+    const val saveFile = "ss.p"
+
     private val context by lazy {
         MainActivity.instance as Context
     }
@@ -18,7 +20,7 @@ object SaveState {
         outState?.run {
             putString("_AuthMessagingNotification", AuthMessagingNotificationContent.toSaveState())
 
-            val file = File(context.filesDir, "state.p")
+            val file = File(context.filesDir, saveFile)
             val parcel = Parcel.obtain()
 
             writeToParcel(parcel, 0)
@@ -43,7 +45,7 @@ object SaveState {
         }
 
         try {
-            val file = File(context.filesDir, "state.p")
+            val file = File(context.filesDir, saveFile)
             val bytes = file.readBytes()
 
             if (bytes.isEmpty()) {
