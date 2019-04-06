@@ -1,19 +1,20 @@
 package se.dennispettersson.webauthy
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.*
 import android.view.MotionEvent.ACTION_CANCEL
 import android.view.MotionEvent.ACTION_UP
+import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
+import android.widget.LinearLayout
 
-
-@Suppress("NON_EXHAUSTIVE_WHEN")
 class SwipeController : Callback() {
     fun addActions(actions: SwipeControllerActions) {
         swipesActions = actions
@@ -50,32 +51,44 @@ class SwipeController : Callback() {
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
+        parent = (viewHolder.itemView.parent as ViewGroup).parent as LinearLayout
+
         if (actionState == ACTION_STATE_SWIPE) {
             setTouchListener(recyclerView, viewHolder, dX)
         }
 
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-
-        drawButtons(c, viewHolder)
     }
 
-    private fun drawButtons(c: Canvas, viewHolder: RecyclerView.ViewHolder) {
-        val v = object {
-            val left = viewHolder.itemView.left.toFloat()
-            val top = viewHolder.itemView.top.toFloat()
-            val right = viewHolder.itemView.right.toFloat()
-            val bottom = viewHolder.itemView.bottom.toFloat()
+    private fun reset() {
+        parent?.setBackgroundColor(Color.WHITE)
+        prevActionState = ActionState.NONE
+    }
+
+    private fun setParentColor(color: Int, action: ActionState) {
+        if (action == prevActionState || animating) {
+            return
         }
 
-        val width = (v.right - v.left) / 2
+        prevActionState = action
+        animating = true
 
-        c.drawRect(RectF(v.left, v.top, v.left + width, v.bottom), Paint().apply {
-            color = ContextCompat.getColor(MainActivity.instance as Context, R.color.colorAllow)
-        })
+        ValueAnimator.ofArgb(prevAnimatedColor, color).apply {
+            duration = animationDuration
+            interpolator = LinearInterpolator()
+            addUpdateListener { anim ->
+                run {
+                    val bg = anim.animatedValue as Int
+                    parent?.setBackgroundColor(bg)
 
-        c.drawRect(RectF(v.right - width, v.top, v.right, v.bottom), Paint().apply {
-            color = ContextCompat.getColor(MainActivity.instance as Context, R.color.colorDeny)
-        })
+                    if (bg == color) {
+                        animating = false
+                        prevAnimatedColor = color
+                    }
+                }
+            }
+            start()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -89,16 +102,36 @@ class SwipeController : Callback() {
 
             when (event.action) {
                 ACTION_STATE_DRAG ->
-                    buttonShowedState = when {
-                        dX < -eventStateWidth -> ActionState.SWIPE_LEFT
-                        dX > eventStateWidth -> ActionState.SWIPE_RIGHT
-                        else -> ActionState.NONE
+                    actionState = when {
+                        dX < -eventStateWidth -> {
+                            setParentColor(colorAllow, ActionState.SWIPE_LEFT)
+                            ActionState.SWIPE_LEFT
+                        }
+                        dX > eventStateWidth -> {
+                            setParentColor(colorDeny, ActionState.SWIPE_RIGHT)
+                            ActionState.SWIPE_RIGHT
+                        }
+                        else -> {
+                            setParentColor(Color.WHITE, ActionState.NONE)
+                            ActionState.NONE
+                        }
                     }
                 ACTION_UP -> {
-                    when (buttonShowedState) {
-                        ActionState.SWIPE_RIGHT -> swipesActions?.onSwipeRight(viewHolder.getAdapterPosition())
-                        ActionState.SWIPE_LEFT -> swipesActions?.onSwipeLeft(viewHolder.getAdapterPosition())
+                    when (actionState) {
+                        ActionState.SWIPE_RIGHT -> {
+                            swipesActions?.onSwipeRight(viewHolder.getAdapterPosition())
+                            reset()
+                        }
+                        ActionState.SWIPE_LEFT -> {
+                            swipesActions?.onSwipeLeft(viewHolder.getAdapterPosition())
+                            reset()
+                        }
+                        else -> {
+                        }
                     }
+
+                }
+                else -> {
                 }
             }
 
@@ -113,9 +146,25 @@ class SwipeController : Callback() {
     }
 
     companion object {
+        private const val TAG = "SC"
+
         private var eventStateWidth = 250.0f
         private var swipeBack = false
-        private var buttonShowedState = ActionState.NONE
+        private var actionState = ActionState.NONE
+        private var prevActionState = ActionState.NONE
         private var swipesActions: SwipeControllerActions? = null
+
+        private val context: Context
+            get() = MainActivity.instance as Context
+
+        private val colorAllow = ContextCompat.getColor(context, R.color.colorAllow)
+        private val colorDeny = ContextCompat.getColor(context, R.color.colorDeny)
+
+        @SuppressLint("StaticFieldLeak")
+        private var parent: LinearLayout? = null
+
+        private var prevAnimatedColor = Color.WHITE
+        private var animating = false
+        private const val animationDuration = 250.toLong()
     }
 }

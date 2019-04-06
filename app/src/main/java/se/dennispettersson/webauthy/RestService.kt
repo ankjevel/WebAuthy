@@ -33,6 +33,7 @@ class RestService {
         return res
     }
 
+    @ExperimentalCoroutinesApi
     fun handleAction(item: AuthMessagingNotification?, action: String) {
         if (item == null) {
             return

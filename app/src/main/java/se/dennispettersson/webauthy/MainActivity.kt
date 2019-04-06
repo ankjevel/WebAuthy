@@ -10,6 +10,7 @@ import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingNotificationRecyclerViewAdapter
 import se.dennispettersson.webauthy.AuthMessaging.AuthMessagingService
 import se.dennispettersson.webauthy.AuthMessaging.Content.AuthMessagingNotification
@@ -26,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         getString(R.string.firebase_topic) as String
     }
 
+    @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -91,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-
+    @ExperimentalCoroutinesApi
     private fun handleIntent(intent: Intent) {
         val accepted = AuthMessagingService.acceptedTags.map {
             if (it != null) getString(it) else null
